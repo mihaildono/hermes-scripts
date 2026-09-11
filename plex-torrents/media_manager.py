@@ -31,10 +31,12 @@ from dotenv import load_dotenv
 # Load environment from current dir or script dir
 script_dir = Path(__file__).resolve().parent
 env_file = script_dir / ".env"
+# Local service settings must override stale values inherited from the
+# global Hermes environment.
 if env_file.exists():
-    load_dotenv(dotenv_path=env_file)
+    load_dotenv(dotenv_path=env_file, override=True)
 else:
-    load_dotenv()
+    load_dotenv(override=True)
 
 RADARR_URL = os.getenv("RADARR_URL", "http://127.0.0.1:7878").rstrip("/")
 RADARR_API_KEY = os.getenv("RADARR_API_KEY", "")
