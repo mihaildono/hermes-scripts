@@ -70,3 +70,24 @@ services:
       - /home/neuromancer/plex/plex-torrents/config/bazarr:/config
       - /home/neuromancer/plex:/data
     restart: unless-stopped
+
+  # 6. Cloudflare challenge solver (PLACEHOLDER, disabled)
+  # FlareSolverr opens indexer sites in a headless Chrome to get past Cloudflare
+  # "checking your browser" pages, then hands the cookies to Prowlarr. Only needed for
+  # indexers behind Cloudflare (e.g. 1337x); the current ones (YTS, Nyaa, LimeTorrents) are not.
+  # Disabled because the Pi 3 (1 GB RAM) is too weak: requests time out after 3+ min, and
+  # Docker here has no memory-limit support, so it can exhaust RAM and take Plex down.
+  # To enable on a Pi 4/5 (4 GB+): uncomment, add cgroup_enable=memory to
+  # /boot/firmware/cmdline.txt and reboot, then in Prowlarr add Settings > Indexers >
+  # Indexer Proxy "FlareSolverr" (host http://127.0.0.1:8191/, tag "flaresolverr")
+  # and give that tag to the indexers that need it.
+  # flaresolverr:
+  #   image: ghcr.io/flaresolverr/flaresolverr:latest
+  #   container_name: flaresolverr
+  #   environment:
+  #     - TZ=Europe/Sofia
+  #     - LOG_LEVEL=info
+  #   ports:
+  #     - "127.0.0.1:8191:8191"   # no auth: localhost only
+  #   mem_limit: 1g
+  #   restart: unless-stopped
