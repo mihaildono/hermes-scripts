@@ -16,6 +16,7 @@ Manage movies on the Raspberry Pi Plex server.
 - qBittorrent "excluded file names" blocks executables/scripts (*.exe, *.scr, *.lnk, *.msi, *.js, *.sh, ...).
 - Minimum seeders 3 on all indexers (Internet Archive: 1, web seeds), set in Prowlarr's sync profile.
   Prowlarr manages the Radarr/Sonarr indexers: change them in Prowlarr, not in the apps.
+- Indexer priority by safety (Prowlarr, lower = preferred): YTS 5, Internet Archive 10, Nyaa 15, LimeTorrents 20, Knaben 30, The Pirate Bay 40.
 - LimeTorrents is not in Radarr on purpose: its empty movie feed fails Radarr's test (searches still work via Knaben).
 - Radarr/Sonarr import only the video file (extra files off). Never open files from ~/plex/torrents.
 
