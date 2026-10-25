@@ -1,6 +1,6 @@
 ---
 name: plex-torrents
-description: "Download, manage, list, and delete movies on the Plex server with Radarr and qBittorrent. Auto-approved with Discord notifications."
+description: "Download, manage, list, and delete movies (Radarr) and TV series (Sonarr) on the Plex server with qBittorrent. Auto-approved with Discord notifications."
 ---
 
 # Plex Torrents & Media Manager
@@ -40,3 +40,13 @@ Run:
 ```bash
 python3 /home/neuromancer/hermes-scripts/plex-torrents/media_manager.py list
 ```
+
+### 4. TV Series (Sonarr)
+Same rules as movies (auto-approved, 1080p default, delete needs an exact title).
+```bash
+python3 /home/neuromancer/hermes-scripts/plex-torrents/tv_manager.py download --query "<TITLE>" [--season <N>] [--year <YEAR>] [--quality <4k|1080p|720p>]
+python3 /home/neuromancer/hermes-scripts/plex-torrents/tv_manager.py delete --query "<EXACT TITLE>"
+python3 /home/neuromancer/hermes-scripts/plex-torrents/tv_manager.py list
+```
+- Pass `--season` when the user names a season; without it every aired season is downloaded.
+- If delete prints "Ambiguous", ask the user which of the listed series they mean.
