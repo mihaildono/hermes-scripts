@@ -78,6 +78,13 @@ def send_discord_notification(message: str):
         print(f"[WARN] Discord send failed: {e}", file=sys.stderr)
 
 
+def ensure_stack():
+    """Containers run on demand (stack.sh stops them when idle); start the movie ones."""
+    res = subprocess.run([str(script_dir / "stack.sh"), "up", "movies"], capture_output=True, text=True)
+    if res.returncode != 0:
+        print(f"[WARN] stack.sh up movies: {res.stderr.strip()}", file=sys.stderr)
+
+
 def check_connection():
     """Checks connection to Radarr."""
     try:
@@ -367,6 +374,7 @@ def main():
         run_monitor(args.title, args.year, args.quality)
         return
 
+    ensure_stack()
     check_connection()
 
     if args.action == "download":

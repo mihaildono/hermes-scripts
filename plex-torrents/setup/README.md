@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Radarr/Prowlarr/qBittorrent/Sonarr/Bazarr stack runs on host networking.
+The Radarr/Prowlarr/qBittorrent/Sonarr stack runs on host networking.
 
 ## Quick Fix Script
 
@@ -43,5 +43,4 @@ API keys are generated automatically by each service in their respective `config
 | Radarr | 7878 | `config/radarr/config.xml` |
 | Prowlarr | 9696 | `config/prowlarr/config.xml` |
 | Sonarr | 8989 | `config/sonarr/config.xml` |
-| Bazarr | 6767 | `config/bazarr/config/config.yaml` |
 | qBittorrent | 8080 | `config/qbittorrent/qBittorrent/qBittorrent.conf` |

@@ -57,21 +57,7 @@ services:
       - /home/neuromancer/plex/torrents:/downloads
     restart: unless-stopped
 
-  # 5. Subtitles Manager
-  bazarr:
-    image: lscr.io/linuxserver/bazarr:latest
-    container_name: bazarr
-    network_mode: host
-    environment:
-      - PUID=1000
-      - PGID=1000
-      - TZ=Europe/Sofia
-    volumes:
-      - /home/neuromancer/plex/plex-torrents/config/bazarr:/config
-      - /home/neuromancer/plex:/data
-    restart: unless-stopped
-
-  # 6. Cloudflare challenge solver (PLACEHOLDER, disabled)
+  # 5. Cloudflare challenge solver (PLACEHOLDER, disabled)
   # FlareSolverr opens indexer sites in a headless Chrome to get past Cloudflare
   # "checking your browser" pages, then hands the cookies to Prowlarr. Only needed for
   # indexers behind Cloudflare (e.g. 1337x); the current ones (YTS, Nyaa, LimeTorrents) are not.

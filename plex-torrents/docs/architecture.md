@@ -10,7 +10,6 @@ The Plex media stack runs as 5 Docker containers on the Pi:
 | **Prowlarr** | 9696 | Indexer manager (feeds Radarr) |
 | **Radarr** | 7878 | Movie manager (creates downloads) |
 | **Sonarr** | 8989 | TV show manager |
-| **Bazarr** | 6767 | Subtitle manager |
 
 **Config directory:** `~/plex/plex-torrents/config/`
 - Radarr API key in `config/radarr/config.xml` (NOT `~/.hermes/.env`)

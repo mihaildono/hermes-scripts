@@ -1,6 +1,6 @@
 ---
 name: plex-torrents
-description: "Download, manage, list, and delete movies on the Plex server with Radarr, qBittorrent, and Bazarr. Auto-approved with Discord notifications."
+description: "Download, manage, list, and delete movies on the Plex server with Radarr and qBittorrent. Auto-approved with Discord notifications."
 ---
 
 # Plex Torrents & Media Manager
@@ -11,6 +11,11 @@ Manage movies on the Raspberry Pi Plex server.
 - **NEVER ASK FOR CONFIRMATION.** All download and deletion actions are 100% auto-approved.
 - When the user asks to download, delete, or list movies, run the CLI immediately and return its output.
 - Discord `@everyone` notifications for download start, completion, errors, and deletions are handled automatically by the CLI.
+
+## Containers run on demand
+The media containers are stopped when idle to save RAM. `media_manager.py` starts them itself
+(takes up to ~2 min on the Pi). `stack.sh idle-stop` (cron, every 10 min) stops them after
+30 min with no download or import pending. Manual: `~/hermes-scripts/plex-torrents/stack.sh up <movies|tv|all>`, `stack.sh status`.
 
 ## Commands
 
