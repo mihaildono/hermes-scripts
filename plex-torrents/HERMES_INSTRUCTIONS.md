@@ -12,6 +12,12 @@ Manage movies on the Raspberry Pi Plex server.
 - When the user asks to download, delete, or list movies, run the CLI immediately and return its output.
 - Discord `@everyone` notifications for download start, completion, errors, and deletions are handled automatically by the CLI.
 
+## Safety settings (keep them)
+- qBittorrent "excluded file names" blocks executables/scripts (*.exe, *.scr, *.lnk, *.msi, *.js, *.sh, ...).
+- Minimum seeders 3 on all indexers (Internet Archive: 1, web seeds). Set in Prowlarr's sync profile;
+  Prowlarr's sync does not update Sonarr's indexers, so Sonarr is set directly (PUT /api/v3/indexer/{id}?forceSave=true).
+- Radarr/Sonarr import only the video file (extra files off). Never open files from ~/plex/torrents.
+
 ## Containers run on demand
 The media containers are stopped when idle to save RAM. `media_manager.py` starts them itself
 (takes up to ~2 min on the Pi). `stack.sh idle-stop` (cron, every 10 min) stops them after
