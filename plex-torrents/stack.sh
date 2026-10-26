@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # stack.sh — run the media containers only when needed (Pi 3 has ~900 MB RAM).
-#   stack.sh up <movies|tv|all>   start a group and wait until its APIs answer
+#   stack.sh up <movies|tv|books|all>   start a group and wait until its APIs answer
 #   stack.sh idle-stop            (cron, every 10 min) stop all of them after IDLE_MIN quiet minutes
 #   stack.sh status
 # "Busy" = a torrent still downloading, or Radarr/Sonarr still have something queued to import.
@@ -12,7 +12,7 @@ CFG=$HOME/plex/plex-torrents/config
 STAMP=$HOME/.local/state/hermes-cron/media-active
 IDLE_MIN=${IDLE_MIN:-30}
 ALL="qbittorrent prowlarr radarr sonarr"
-declare -A GROUP=( [movies]="qbittorrent prowlarr radarr" [tv]="qbittorrent prowlarr sonarr" [all]="$ALL" )
+declare -A GROUP=( [movies]="qbittorrent prowlarr radarr" [tv]="qbittorrent prowlarr sonarr" [books]="qbittorrent prowlarr" [all]="$ALL" )
 declare -A PORT=( [qbittorrent]=8080 [prowlarr]=9696 [radarr]=7878 [sonarr]=8989 )
 mkdir -p "$(dirname "$STAMP")"
 

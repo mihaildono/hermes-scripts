@@ -1,6 +1,6 @@
 ---
 name: plex-torrents
-description: "Download, manage, list, and delete movies (Radarr) and TV series (Sonarr) on the Plex server with qBittorrent. Auto-approved with Discord notifications."
+description: "Download, manage, list, and delete movies (Radarr), TV series (Sonarr) and ebooks for the Kindle/KOReader on the Plex server with qBittorrent. Auto-approved with Discord notifications."
 ---
 
 # Plex Torrents & Media Manager
@@ -58,3 +58,16 @@ python3 /home/neuromancer/hermes-scripts/plex-torrents/tv_manager.py list
 ```
 - Pass `--season` when the user names a season; without it every aired season is downloaded.
 - If delete prints "Ambiguous", ask the user which of the listed series they mean.
+
+### 5. Books (Kindle / KOReader)
+```bash
+python3 /home/neuromancer/hermes-scripts/plex-torrents/book_manager.py download --query "<TITLE> [AUTHOR]"
+python3 /home/neuromancer/hermes-scripts/plex-torrents/book_manager.py list
+python3 /home/neuromancer/hermes-scripts/plex-torrents/book_manager.py push --query "<TITLE WORDS>"
+python3 /home/neuromancer/hermes-scripts/plex-torrents/book_manager.py delete --query "<TITLE WORDS>"
+```
+- Auto-approved like movies. Picks EPUB first, then safest indexer, then seeders. Books land in ~/plex/books.
+- When done it pushes to the Kindle over KOReader's SSH server if KINDLE_HOST is set in .env and the Kindle is awake;
+  otherwise the book waits in the OPDS catalog (service heavenpi-opds, http://192.168.0.106:8091/opds).
+- "No ebook found": retry once with the author's name or a shorter title, then tell the user.
+- push/delete "Ambiguous": ask the user which book.
