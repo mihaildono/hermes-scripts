@@ -2,7 +2,9 @@
 // One direct model call: prompt + digest in, JSON out. No agent loop, no tool
 // schemas, no skills index — only the tokens the task needs.
 // Uses Hermes' configured model (~/.hermes/config.yaml), so switching the Hermes
-// model switches this too. Override with NEWS_MODEL=... if ever needed.
+// model switches this too. NEWS_MODEL=... pins a model for this job only.
+// If the primary keeps failing it falls back to Hermes' fallback_model, or to
+// Hermes' default model when NEWS_MODEL is set.
 // Output is normalised afterwards by `news-daily.js clean`.
 import fs from "node:fs";
 
@@ -13,6 +15,9 @@ const config = fs.readFileSync(`${HERMES}/config.yaml`, "utf8");
 const modelBlock = config.match(/^model:\n((?:[ \t]+.*\n?)*)/m)?.[1] ?? "";
 const field = (name) => modelBlock.match(new RegExp(`^\\s+${name}:\\s*["']?([^"'\\n#]+)`, "m"))?.[1].trim();
 const model = process.env.NEWS_MODEL || field("default");
+// Same provider only: the API key below is the primary provider's
+const fallbackBlock = config.match(/^fallback_model:\n((?:[ \t]+.*\n?)*)/m)?.[1] ?? "";
+const fallback = fallbackBlock.match(/^\s+model:\s*["']?([^"'\n#]+)/m)?.[1].trim() || field("default");
 const provider = field("provider") || "openrouter";
 const baseUrl = (field("base_url") || "https://openrouter.ai/api/v1").replace(/\/$/, "");
 
@@ -26,7 +31,7 @@ const messages = [
   { role: "user", content: "Digest:\n" + fs.readFileSync(digestFile, "utf8") + "\nReply with the JSON only." },
 ];
 
-async function ask() {
+async function ask(model) {
   const res = await fetch(`${baseUrl}/chat/completions`, {
     method: "POST",
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
@@ -51,16 +56,19 @@ async function ask() {
   return { json, used: body.model, usage: body.usage ?? {} };
 }
 
-// Retry transient failures (rate limits, refusals, malformed replies)
-for (let attempt = 1; attempt <= 3; attempt++) {
+// Retry transient failures (rate limits, refusals, malformed replies): two tries
+// on the primary model, then two on the fallback
+const attempts = [model, model, ...(fallback && fallback !== model ? [fallback, fallback] : [model])];
+for (const [i, m] of attempts.entries()) {
+  const attempt = i + 1;
   try {
-    const { json, used, usage } = await ask();
+    const { json, used, usage } = await ask(m);
     fs.writeFileSync(outFile, JSON.stringify(json, null, 2) + "\n");
     console.log(`✅ ${json.stories.length} stories via ${used} (tokens: ${usage.prompt_tokens} in / ${usage.completion_tokens} out)`);
     process.exit(0);
   } catch (error) {
-    console.error(`attempt ${attempt} (${model}): ${error.message}`);
-    if (attempt < 3) await new Promise((r) => setTimeout(r, 60_000));
+    console.error(`attempt ${attempt} (${m}): ${error.message}`);
+    if (attempt < attempts.length) await new Promise((r) => setTimeout(r, 60_000));
   }
 }
 process.exit(1);

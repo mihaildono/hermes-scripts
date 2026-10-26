@@ -19,7 +19,7 @@ fi
 
 cd "$HOME/Personal/techno-tavern"
 ./scripts/daily-top-news.sh prepare
-node "$HERE/summarize-news.mjs" prompts/daily-news-summary.md news/data/news-digest.md news/data/top-news.json
+NEWS_MODEL=deepseek/deepseek-v4.1-flash-1017 node "$HERE/summarize-news.mjs" prompts/daily-news-summary.md news/data/news-digest.md news/data/top-news.json
 ./scripts/daily-top-news.sh finish
 "$HERMES" send -q --to "$NEWS" --file news/data/discord-message.txt
 echo "$SLOT" > "$POSTED"
