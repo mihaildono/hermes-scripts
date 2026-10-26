@@ -37,7 +37,11 @@ BOOKS_DIR = Path(os.getenv("BOOKS_DIR", Path.home() / "plex/books"))
 TORRENTS_HOST = Path.home() / "plex/torrents"   # mounted as /downloads in qBittorrent
 CATEGORY = "books"
 
-# KOReader SSH server (Tools > More tools > SSH server); set KINDLE_HOST in .env to enable pushing
+# KOReader SSH server (Tools > More tools > SSH server); set KINDLE_HOST in .env to enable pushing.
+# Pushing only reaches the Kindle on the home Wi-Fi (192.168.0.x). To push from anywhere (hotel
+# Wi-Fi, phone hotspot), install Tailscale on the jailbroken Kindle (userspace networking, ~30-50 MB
+# RAM, more battery drain; drops while the Kindle sleeps) and set KINDLE_HOST to its 100.x address.
+# Not set up: the home-Wi-Fi push plus the OPDS catalog are enough for now.
 KINDLE_HOST = os.getenv("KINDLE_HOST", "")
 KINDLE_PORT = os.getenv("KINDLE_PORT", "2222")
 KINDLE_DIR = os.getenv("KINDLE_DIR", "/mnt/us/documents/heavenpi")
