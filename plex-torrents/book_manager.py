@@ -44,7 +44,7 @@ CATEGORY = "books"
 # Not set up: the home-Wi-Fi push plus the OPDS catalog are enough for now.
 KINDLE_HOST = os.getenv("KINDLE_HOST", "")
 KINDLE_PORT = os.getenv("KINDLE_PORT", "2222")
-KINDLE_DIR = os.getenv("KINDLE_DIR", "/mnt/us/documents/heavenpi")
+KINDLE_DIR = os.getenv("KINDLE_DIR", "/mnt/us/documents")
 KINDLE_KEY = Path.home() / ".ssh/kindle_ed25519"
 KINDLE_IP_FILE = Path.home() / ".local/state/hermes-cron/kindle-ip"   # last address the Kindle answered on
 
