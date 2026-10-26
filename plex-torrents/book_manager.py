@@ -19,10 +19,12 @@ import argparse
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import time
 import zipfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 import requests
 
@@ -40,6 +42,7 @@ KINDLE_HOST = os.getenv("KINDLE_HOST", "")
 KINDLE_PORT = os.getenv("KINDLE_PORT", "2222")
 KINDLE_DIR = os.getenv("KINDLE_DIR", "/mnt/us/documents/heavenpi")
 KINDLE_KEY = Path.home() / ".ssh/kindle_ed25519"
+KINDLE_IP_FILE = Path.home() / ".local/state/hermes-cron/kindle-ip"   # last address the Kindle answered on
 
 FORMATS = [".epub", ".azw3", ".mobi", ".fb2", ".pdf"]   # KOReader-readable, in order of preference
 MAX_SIZE = 300 * 1024**2                                   # skip "1000 books" packs
@@ -147,16 +150,49 @@ def import_book(content_path: Path):
     return dest
 
 
+def kindle_ssh(host: str, *args, scp: bool = False, timeout: int = 30):
+    """ssh/scp to KOReader. HostKeyAlias pins the Kindle's host key, so a new IP is fine but another device is not."""
+    opts = ["-i", str(KINDLE_KEY), "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
+            "-o", "HostKeyAlias=kindle", "-o", "StrictHostKeyChecking=yes", "-P" if scp else "-p", KINDLE_PORT]
+    if scp:
+        cmd = ["scp", *opts, args[0], f"root@{host}:{args[1]}"]
+    else:
+        cmd = ["ssh", *opts, f"root@{host}", *args]
+    return subprocess.run(cmd, capture_output=True, timeout=timeout).returncode == 0
+
+
+def find_kindle():
+    """The Kindle's DHCP address can change: try the last known one, else scan the /24 for KOReader's SSH port."""
+    known = KINDLE_IP_FILE.read_text().strip() if KINDLE_IP_FILE.exists() else KINDLE_HOST
+    if known and kindle_ssh(known, "true"):
+        return known
+    prefix = (known or "192.168.0.1").rsplit(".", 1)[0]
+
+    def port_open(ip):
+        try:
+            with socket.create_connection((ip, int(KINDLE_PORT)), timeout=1):
+                return ip
+        except OSError:
+            return None
+
+    with ThreadPoolExecutor(64) as pool:
+        hosts = [ip for ip in pool.map(port_open, (f"{prefix}.{i}" for i in range(1, 255))) if ip]
+    for ip in hosts:
+        if kindle_ssh(ip, "true"):
+            KINDLE_IP_FILE.parent.mkdir(parents=True, exist_ok=True)
+            KINDLE_IP_FILE.write_text(ip)
+            return ip
+    return None
+
+
 def push_to_kindle(book: Path):
     """Copy a book to KOReader over SSH. Returns True on success; False if not configured or Kindle asleep."""
     if not KINDLE_HOST or not KINDLE_KEY.exists():
         return False
-    ssh = ["-i", str(KINDLE_KEY), "-o", "BatchMode=yes", "-o", "ConnectTimeout=10", "-o", "StrictHostKeyChecking=accept-new"]
-    target = f"root@{KINDLE_HOST}"
     try:
-        subprocess.run(["ssh", *ssh, "-p", KINDLE_PORT, target, f"mkdir -p '{KINDLE_DIR}'"], check=True, capture_output=True, timeout=30)
-        subprocess.run(["scp", *ssh, "-P", KINDLE_PORT, str(book), f"{target}:{KINDLE_DIR}/"], check=True, capture_output=True, timeout=300)
-        return True
+        host = find_kindle()
+        return bool(host) and kindle_ssh(host, f"mkdir -p '{KINDLE_DIR}'") \
+            and kindle_ssh(host, str(book), f"{KINDLE_DIR}/", scp=True, timeout=300)
     except Exception:
         return False
 

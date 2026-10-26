@@ -37,9 +37,11 @@ async function ask(model) {
     headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
     body: JSON.stringify({
       model, messages, temperature: 0.2,
-      // Extraction task: keep hidden reasoning minimal (ignored by non-reasoning models)
-      reasoning: { max_tokens: 1500 },
-      max_tokens: 8000,
+      // Extraction task: the digest grows with the feed (346 lines on a busy day),
+      // so reasoning + answer together can exceed the old 8k cap and the model
+      // returns finish=length with no JSON. Budget both generously.
+      reasoning: { max_tokens: 8000 },
+      max_tokens: 32000,
     }),
     signal: AbortSignal.timeout(300_000),
   });
