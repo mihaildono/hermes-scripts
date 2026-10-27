@@ -7,6 +7,7 @@ set -euo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 HERMES=$HOME/.hermes/hermes-agent/venv/bin/hermes
 NEWS=discord:1546793311115681882
+REPORTS=discord:1546793280459636758
 # Once-per-slot guard: retries, the watchdog, Hermes or a manual run can never post twice.
 # A run belongs to the most recent 18:30 slot, so a retry that finally succeeds after
 # midnight posts the missed edition and does not block that evening's run.
@@ -24,3 +25,9 @@ NEWS_MODEL=deepseek/deepseek-v4.1-flash-1017 node "$HERE/summarize-news.mjs" pro
 "$HERMES" send -q --to "$NEWS" --file news/data/discord-message.txt
 echo "$SLOT" > "$POSTED"
 echo "📨 posted to #news"
+
+# Facebook/Instagram report from finish (only exists when a post was attempted).
+SOCIAL=news/data/social/discord-message.txt
+if [ -s "$SOCIAL" ]; then
+  "$HERMES" send -q --to "$REPORTS" --file "$SOCIAL" || echo "⚠️ social report not sent"
+fi
